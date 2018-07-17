@@ -1,0 +1,49 @@
+//folder mouse:use two potentiometers linked to sticks to position the mouse pen
+#include <Mouse.h>
+bool f_press=HIGH;
+double a1=0;                                //angles now(radian)
+double a2=0;
+double a1_b=0;                              //angles before
+double a2_b=0;
+double da1=0;
+double da2=0;
+double dx=0;
+double dy=0;
+double dx_b=0;                             //the coordinate changings before.add it with the changing this time to smooth the moving
+double dy_b=0;
+void setup() {
+  pinMode(4,INPUT_PULLUP);
+  pinMode(5,INPUT_PULLUP);
+  Serial.begin(9600);
+  Mouse.begin();
+}
+
+void loop() {
+  if(digitalRead(4)==LOW)    //the mouse pen is attaching the desk,cusor should be moved
+  {
+    a1=map(analogRead(0),0,1024,-2.618,2.618);     //get the angle of the stick from the potential
+    a2=map(analogRead(1),1,1024,-2.618,2.618);
+    da1=a1-a1_b;
+    da2=a2-a2_b;
+    dx=da2*sin(a2)-da1*sin(a1);                  //calculate the movement on both axises
+    dy=da1*cos(a1)+da2*cos(a2);
+    Mouse.move(dx+dx_b,dy+dy_b,0);
+    a1_b=a1;
+    a2_b=a2;
+    dx_b=dx;
+    dy_b=dy;
+    if(digitalRead(5)==LOW&&f_press==HIGH)
+    {
+      Mouse.click();
+    }
+    f_press=digitalRead(5);
+    delay(2);
+  }
+  else                                      //cusor don't move,just renew the angles
+  {
+    a1_b=map(analogRead(0),0,1024,-2.618,2.618);     //get the angle of the stick from the potential
+    a2_b=map(analogRead(1),1,1024,-2.618,2.618);
+    delay(20);
+  }
+
+}
