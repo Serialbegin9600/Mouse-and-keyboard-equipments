@@ -1,0 +1,52 @@
+#include <Mouse.h>
+bool f_press=HIGH;
+int x_b;
+int y_b;
+int x;
+int y;
+int xmove_b;
+int ymove_b;
+void setup() {
+  pinMode(4,INPUT_PULLUP);
+  pinMode(5,INPUT_PULLUP);
+  Mouse.begin();
+  Serial.begin(9600);
+}
+void loop() {
+  if(digitalRead(4)==LOW)
+  {
+
+    x=analogRead(0);
+    y=analogRead(1);
+    
+    int xmove;
+    int ymove;
+    xmove=2*x-2*x_b;
+    ymove=2*y-2*y_b;
+    Mouse.move(xmove+xmove_b,ymove+ymove_b,0);
+    Serial.print("xmove=");
+    Serial.print(xmove);
+    Serial.print("        ymove=");
+    Serial.println(ymove);
+    x_b=x;
+    y_b=y;
+    xmove_b=xmove;
+    ymove_b=ymove;
+    if(digitalRead(5)==LOW&&f_press==HIGH)
+    {
+      Mouse.click();
+    }
+    f_press=digitalRead(5);
+    delay(2);
+  }
+  else
+  {
+    x_b=analogRead(0);
+    y_b=analogRead(1);
+    Serial.print(x_b);
+    Serial.print("     ");
+    Serial.println(y_b);
+    delay(50);
+  }
+  
+}
