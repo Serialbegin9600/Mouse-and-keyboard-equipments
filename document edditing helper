@@ -1,0 +1,90 @@
+//keys for shift,backspace,coppy,pase and so on
+#include <Keyboard.h>
+bool f_delete=HIGH;
+bool f_backspace=HIGH;
+bool f_enter=HIGH;
+bool f_coppy=HIGH;
+bool f_pase=HIGH;
+bool shiftstate=false;
+
+void shift()
+{
+  if(digitalRead(2)==LOW&&shiftstate==false)
+  {
+    Keyboard.press(0x81);
+    shiftstate=true;
+  }
+  if(digitalRead(2)==HIGH)
+  {
+    Keyboard.release(0x81);
+    shiftstate=false;
+  }
+}
+void backspace()
+{
+  if(digitalRead(3)==LOW&&f_backspace==HIGH)
+  {
+    Keyboard.print(0xB2);
+  }
+  f_backspace=digitalRead(3);
+}
+void deletekey()
+{
+  if(digitalRead(4)==LOW&&f_delete==HIGH)
+  {
+    Keyboard.print(0xD4);
+  }
+  f_delete=digitalRead(4);
+}
+void enter()
+{
+  if(digitalRead(5)==LOW&&f_enter==HIGH)
+  {
+    Keyboard.print(0xB0);
+  }
+  f_enter=digitalRead(5);
+}
+
+
+void coppy()
+{
+  if(digitalRead(6)==LOW&&f_coppy==HIGH)
+  {
+    Keyboard.press(0x84);
+    Keyboard.print("c");
+    Keyboard.releaseAll();
+  }
+  f_coppy=digitalRead(6);
+}
+void pase()
+{
+  if(digitalRead(7)==LOW&&f_pase==HIGH)
+  {
+    Keyboard.press(0x84);
+    Keyboard.print("v");
+    Keyboard.releaseAll();
+  }
+  f_pase=digitalRead(7);
+}
+
+
+void setup() {
+  for(int i=2;i<9;i++)
+  {
+    pinMode(i,INPUT_PULLUP); //2:shift;3:backspace;4:delete;5:enter;6:coppy;7:pase
+  }
+  Keyboard.begin();
+}
+
+void loop() {
+  while(digitalRead(8)==LOW)
+  {
+    shift();
+    backspace();
+    deletekey();
+    enter();
+    coppy();
+    pase();      //check each key if it's pressed
+  }
+  delay(20);
+}
