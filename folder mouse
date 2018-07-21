@@ -17,6 +17,7 @@ void mousepress()
     {
       Mouse.press();
       if_press=true;
+//      Serial.println("pressed!");
     }
     else if(digitalRead(5)==HIGH&&if_press==true)   //if the mouse is in the pressed state but the button has been released
     {
@@ -27,31 +28,40 @@ void mousepress()
 void setup() {
   pinMode(4,INPUT_PULLUP);
   pinMode(5,INPUT_PULLUP);
-  Serial.begin(9600);
+//  Serial.begin(9600);
   Mouse.begin();
 }
 
 void loop() {
-  if(digitalRead(4)==LOW)    //the mouse pen is attaching the desk,cusor should be moved
+  if(digitalRead(4)==LOW)    //the mouse pen is pressed on the desk,cusor should be moved
   {
-    a1=map(analogRead(0),0,1024,-2.618,2.618);     //get the angle of the stick from the potential
-    a2=map(analogRead(1),1,1024,-2.618,2.618);
+    a1=analogRead(0)*0.004091-2.094;     //get the angle of the stick from the potential
+    a2=analogRead(1)*0.004091-2.094;
+    
     da1=a1-a1_b;
     da2=a2-a2_b;
-    dx=da2*sin(a2)-da1*sin(a1);                  //calculate the movement on both axises
+    dx=da1*sin(a1)-da2*sin(a2);                  //calculate the movement on both axises
     dy=da1*cos(a1)+da2*cos(a2);
-    Mouse.move(dx+dx_b,dy+dy_b,0);
+/*    Serial.print("dx");
+    Serial.print(dx);
+    Serial.print("       dy");
+    Serial.println(dy);*/
+    Mouse.move(300*dx+300*dx_b,300*dy+300*dy_b,0);
     a1_b=a1;
     a2_b=a2;
     dx_b=dx;
     dy_b=dy;
     mousepress();
-    delay(2);
+    delay(5);
   }
   else                                      //cusor don't move,just renew the angles
   {
-    a1_b=map(analogRead(0),0,1024,-2.618,2.618);     //get the angle of the stick from the potential
-    a2_b=map(analogRead(1),1,1024,-2.618,2.618);
+    Mouse.release();                               //the working of the mouse stopped,release the mouse
+    a1_b=analogRead(0)*0.004091-2.094;     //get the angle of the stick from the potential
+    a2_b=analogRead(1)*0.004091-2.094;
+/*    Serial.print(a1_b);
+    Serial.print("       ");
+    Serial.println(a2_b);*/
     delay(20);
   }
 
