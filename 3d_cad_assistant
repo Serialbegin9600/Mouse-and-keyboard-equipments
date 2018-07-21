@@ -1,0 +1,60 @@
+//3D CAD assistant:help users to rotate the 3D modle on the screen
+#include <Mouse.h>
+bool if_press=false;
+int x=0;
+int y=0;
+int x_moved=0;
+int y_moved=0;
+int x0=512;
+int y0=512;
+
+void press_check()
+{
+   if(digitalRead(5)==LOW&&if_press==false)
+    {
+      Mouse.press(MOUSE_MIDDLE);
+      if_press=true;
+    }
+    else if(digitalRead(5)==HIGH&&if_press==true)
+    {
+      Mouse.release(MOUSE_MIDDLE);
+      if_press=false;
+    }
+}
+
+void setup() { 
+  pinMode(5,INPUT_PULLUP);
+  Mouse.begin();
+  Serial.begin(9600);
+
+}
+
+void loop() {
+   press_check();
+   if(if_press==true)               //if the enable button is pressed
+   {
+     x=analogRead(0)-x0;
+     y=analogRead(1)-y0;
+     Mouse.move(0,-y_moved,0);    //move back to the x_axis
+     Mouse.move(x-x_moved,0,0);    //move to the new x coordinate
+     Mouse.move(0,y,0);            //moveto the new y coordinate
+     x_moved=x;
+     y_moved=y;                     //renew the moved distance on x and y axis
+     Serial.print(x_moved);
+     Serial.print("                  ");
+     Serial.println(y_moved);
+     delay(5);
+   }
+  else
+  {
+    x_moved=0;
+    y_moved=0;
+    x0=analogRead(0);
+    y0=analogRead(1);     //renew the original point
+    Serial.print(x0);
+    Serial.print("     ");
+    Serial.println(y0);
+    delay(30);
+  }
+
+}
