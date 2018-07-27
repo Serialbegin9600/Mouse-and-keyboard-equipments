@@ -1,0 +1,74 @@
+//hand movement roller:control the middle weel by the move of hand
+#include <Mouse.h>
+double distance;
+double distance_b;      //the distance before
+bool if_set=false;
+void get_distance()
+{
+  digitalWrite(3,LOW);
+  delayMicroseconds(2);
+  digitalWrite(3,HIGH);
+  delayMicroseconds(10);
+  digitalWrite(3,LOW);
+  distance=pulseIn(4,HIGH)/10;
+  Serial.print(distance);
+  Serial.print("      ");
+  Serial.print (distance_b);
+}
+void setup_distance()
+{
+  get_distance();
+  distance_b=distance;
+  if_set=false;         //don't need to be set again
+}
+void setup() {
+  pinMode(3,OUTPUT);
+  pinMode(4,INPUT);
+  pinMode(5,INPUT_PULLUP);
+  Serial.begin(9600);
+  Mouse.begin();
+}
+
+void loop() {
+  get_distance();
+  if(digitalRead(5)==LOW&&distance<200)
+  {
+    if(if_set==true)
+    {
+      setup_distance();
+    }
+    int mov=distance-distance_b;
+    if(mov>5&&mov<20)
+    {
+      Mouse.move(0,0,-1);
+      Serial.print("     ");
+      Serial.println("up");
+      distance_b=distance;
+    }
+    else if(mov<-5&&mov>-20)
+    {
+      Mouse.move(0,0,1);
+      Serial.print("     ");
+      Serial.println("down");
+      distance_b=distance;
+    }
+    else if(mov<-19||mov>19)           //renew distance before to be compared
+    {
+      setup_distance();
+      Serial.print("    ");
+      Serial.println("reseted");
+    }
+    else
+    {
+      Serial.print("     ");
+      Serial.println("no movement");
+    }
+  }
+  else
+  {
+    Serial.print("   ");
+    Serial.println("stoped");
+    if_set=true;
+  }
+  delay(50);
+}
