@@ -17,8 +17,9 @@ int x=0;
 int y=0;
 int x0=0;          //存储上一时刻的xy位置，供鼠标移动用
 int y0=0;
-
-int rowed=0;          //存储滚轮移动量，达到一定值之后移动滚轮
+int x_moved=0;
+int y_moved=0;
+int rowed=0;          //存储滚轮移动量，达到一定值之后移动滚轮sddsdds ee  
 
 char keys[3][5]={           //存储键盘上键对应的字符
   {'q','w','e','r','t'},
@@ -31,7 +32,7 @@ char keyboard_pressed=' ';     //存储键盘当前输出的提示位信息
 
 bool on_board(int x,int y)
 {
-  return x>20&&x<1000&&y>20&&y<1000;       //检测xy是否在合理范围内，以确定手是否在触摸板上
+  return x>200&&x<800&&y>200&&y<800;       //检测xy是否在合理范围内，以确定手是否在触摸板上
 }
 
 int num()                               //读取并返回手部按钮被按下的个数
@@ -58,7 +59,6 @@ void read_x()               //读取x位置
   }
   digitalWrite(xs[0],LOW);
   digitalWrite(xs[1],HIGH);
-  delay(2);
   x=analogRead(0);
 }
 void read_y()            //读取y位置
@@ -70,7 +70,6 @@ void read_y()            //读取y位置
   }
   digitalWrite(ys[0],LOW);
   digitalWrite(ys[1],HIGH);
-  delay(2);
   y=analogRead(1);
 }
 
@@ -88,7 +87,6 @@ void shift()       //鼠标转键盘或键盘转鼠标
      Keyboard.print("  ");
      keyboard_pressed=' ';                            //清空之前的已打印提示字数据*/
      mode=true;
-     Serial.println("Changed to keyboard mode!!");
    }
   if(mode==true&&number<2)                //从键盘到鼠标：清空提示位；初始化鼠标；重新定标 
   {
@@ -99,8 +97,7 @@ void shift()       //鼠标转键盘或键盘转鼠标
      Mouse.begin();
      x0=x;
      y0=y;
-     mode=false;
-     Serial.println("Changed to mouse mode!!");    
+     mode=false;  
   }
 }
 
@@ -110,7 +107,7 @@ char get_key()              //查找触摸位置对应的键，若触点不在�
   char key=' ';
   if(on_board(x,y))
   {
-    key=keys[(y-20)/330][(x-20)/200];
+    key=keys[(y-200)/200][(x-200)/160];
   }
   return key;
 }
@@ -122,8 +119,6 @@ void show()           //键盘显示和更新提示位
     Keyboard.press(0xB2);
     Keyboard.releaseAll();
     Keyboard.print(key);
-    //Serial.print("The key showed have changed to        ");
-    //Serial.println(key);
   }
   keyboard_pressed=key;
 }
@@ -136,13 +131,8 @@ void type()            //键盘正式打印字符:先退掉两个提示位,然�
   Keyboard.releaseAll();
   Keyboard.print(key);
   Keyboard.print("  ");
-  //Serial.print("Typed        ");
-  //Serial.println(key);
   keyboard_pressed=' ';
 }
-
-
-
 
 
 
@@ -156,14 +146,19 @@ void mouse_move()        //移动鼠标
       if(rowed>20||rowed<-20)
       {
         Mouse.move(0,0,rowed/20);        //滚动正负一格
-        //Serial.println("rowed");
         rowed=0;
       }
     }
     else
     {
-      Mouse.move(x-x0,y-y0,0);               //若有一只手在盘上，鼠标水平移动
-      //Serial.println("moved.......");
+      int x_move=x-x0;
+      int y_move=y-y0;
+      if(abs(x_move)<3&&abs(y_move)<3)
+      {
+        Mouse.move(2*x_move+2*x_moved,2*y_move+2*y_moved,0);               //若有一只手在盘上，鼠标水平移动
+        x_moved=x_move;
+        y_moved=y_move;
+      }
     }
   }
   x0=x;
@@ -186,19 +181,16 @@ void if_press()     //检测触摸板动作：被按下时，键盘打印或鼠�
     else
     {
       Mouse.press();
-      //Serial.println("PRESSED!!!");
     }
   }
   else if(p==HIGH&&press_mode==LOW&&mode==false)
   {
     Mouse.release();
-    //Serial.println("RELEASED!!!");
   }
   press_mode=p;
 }
 
 void setup() {
-  Serial.begin(9600);
   mode=false;
   Mouse.begin();
   pinMode(6,INPUT_PULLUP);               //67为手部按钮，8为按键按钮，9为键鼠功能使能按钮
@@ -208,7 +200,7 @@ void setup() {
 
 }
 
-void loop() {
+void loop(){
   shift();                      //检查是否转换模式并执行
   read_x();
   read_y();
@@ -224,6 +216,6 @@ void loop() {
     }
     if_press();                      //监测触摸板是否被按下并执行相应操作
   }
-  delay(5);
+  delay(2);
 
 }
